@@ -1,7 +1,7 @@
 #!/bin/bash
 
 AGENT=oracle_agent
-DATA_DIR=data2
+DATA_DIR=data
 
 frames=$1
 if [ -z $frames ]; then
