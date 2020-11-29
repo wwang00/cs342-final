@@ -10,4 +10,4 @@ if [ -z $frames ]; then
 fi
 
 rm -rf $DATA_DIR*
-python3 -m tournament.play -s $DATA_DIR -f $1 AI $AGENT AI
+python3 -m tournament.play -s $DATA_DIR -f $1 $AGENT AI $AGENT AI

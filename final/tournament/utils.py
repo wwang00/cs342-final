@@ -89,6 +89,7 @@ class Tournament:
                     draw = PIL.ImageDraw.Draw(img)
                     loc_x = round(state.karts[i].location[0], 2)
                     loc_z = round(state.karts[i].location[2], 2)
+                    draw.text((0, 20), f'T: {state.time}', (255, 0, 0), font)
                     draw.text((0, 40), f'({loc_x}, {loc_z})', (255, 0, 0), font)
                     img.save(os.path.join(save, 'player%02d_%05d.png' % (i, t)))
 
