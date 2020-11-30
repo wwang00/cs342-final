@@ -4,6 +4,7 @@ import numpy as np
 
 # Privileged information.
 HACK_DICT = dict()
+HM_RADIUS = 2
 
 
 class Player:
@@ -52,14 +53,13 @@ class Tournament:
 
     def play(self, save=None, max_frames=50):
         state = pystk.WorldState()
-        # state.set_ball_location([30, 0, 40], [-15, 0, -15])
-        # state.set_ball_location([20, 0, -40], [0, 0, 0])
-        # state.set_kart_location(0, [0, 0, 20])
+
         if save is not None:
             import PIL.Image
             import PIL.ImageDraw
             import PIL.ImageFont
             import os
+            import torchvision.transforms.functional as T
             if not os.path.exists(save):
                 os.makedirs(save)
 
@@ -77,7 +77,16 @@ class Tournament:
                 HACK_DICT['state'] = state
 
                 player = state.players[i]
-                image = np.array(self.k.render_data[i].image)
+                image = np.array(T.resize(PIL.Image.fromarray(self.k.render_data[i].image), (150, 200)))[54:]
+                heatmap = np.zeros((96, 200), dtype=float)
+                puck_mask = np.array(self.k.render_data[i].instance[108:] == 134217729)
+                puck_visible = np.any(puck_mask)
+                if puck_visible:
+                    puck_loc = np.argwhere(puck_mask).mean(0) / 2
+                    y, x = np.arange(96, dtype=float), np.arange(200, dtype=float)
+                    gy = np.exp(-((y - puck_loc[0]) / HM_RADIUS)**2)
+                    gx = np.exp(-((x - puck_loc[1]) / HM_RADIUS)**2)
+                    heatmap = gy[:, None] * gx[None] * 256
 
                 action = pystk.Action()
                 player_action = p(image, player)
@@ -87,14 +96,16 @@ class Tournament:
                 list_actions.append(action)
 
                 if save is not None:
-                    img = PIL.Image.fromarray(image)
-                    font = PIL.ImageFont.truetype("font.ttf", 16)
-                    draw = PIL.ImageDraw.Draw(img)
-                    loc_x = round(state.karts[i].location[0], 2)
-                    loc_z = round(state.karts[i].location[2], 2)
-                    draw.text((0, 20), f'T: {state.time}', (255, 0, 0), font)
-                    draw.text((0, 40), f'({loc_x}, {loc_z})', (255, 0, 0), font)
-                    img.save(os.path.join(save, 'player%02d_%05d.png' % (i, t)))
+                    image = PIL.Image.fromarray(image)
+                    heatmap = PIL.Image.fromarray(heatmap).convert('RGB')
+                    # font = PIL.ImageFont.truetype("font.ttf", 16)
+                    # draw = PIL.ImageDraw.Draw(image)
+                    # loc_x = round(state.karts[i].location[0], 2)
+                    # loc_z = round(state.karts[i].location[2], 2)
+                    # draw.text((0, 20), f'T: {state.time}', (255, 0, 0), font)
+                    # draw.text((0, 40), f'({loc_x}, {loc_z})', (255, 0, 0), font)
+                    image.save(os.path.join(save, 'player%02d_%05d.png' % (i, t)))
+                    heatmap.save(os.path.join(save, 'player%02d_%05d_hm.png' % (i, t)))
 
             s = self.k.step(list_actions)
             if not s:  # Game over
