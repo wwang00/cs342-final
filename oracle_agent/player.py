@@ -11,7 +11,7 @@ class HockeyPlayer(object):
 
     def __init__(self, player_id=0):
         self.player_id = player_id
-        self.kart = 'wilber'
+        self.kart = 'tux'
         self.team = player_id % 2
         self.offense = player_id < 2
         self.goal = np.float32([0, 64 if self.team == 0 else -64])
@@ -70,10 +70,10 @@ class HockeyPlayer(object):
                 drift = self.DRIFT_ANGLE <= theta and not brake
                 accel = 1 if speed < self.TARGET_SPEED and not brake else 0
             elif np.abs(kart[1]) < np.abs(self.own_goal[1]):
-                brake = 1
+                brake = True
                 accel = 0
             else:
-                brake = 1 if (np.sign(np.dot(u, vel)) == 1 and speed > 2) or 5 <= theta else 0
+                brake = (np.sign(np.dot(u, vel)) == 1 and speed > 2) or 5 <= theta
                 accel = 1 if brake == 0 and np.sign(np.dot(u, vel)) == -1 and speed > 2 else 0
 
         return {
