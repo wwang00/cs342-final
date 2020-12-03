@@ -8,6 +8,20 @@ HACK_DICT = dict()
 HM_RADIUS = 2
 
 
+class DummyPlayer:
+    def __init__(self, team=0):
+        self.team = team
+
+    @property
+    def config(self):
+        return pystk.PlayerConfig(
+            controller=pystk.PlayerConfig.Controller.AI_CONTROL,
+            team=self.team
+        )
+
+    def __call__(self, image, player_info, **kwargs):
+        return dict()
+
 class Player:
     def __init__(self, player, team=0):
         self.player = player
@@ -21,8 +35,8 @@ class Player:
             team=self.team
         )
 
-    def __call__(self, image, player_info):
-        return self.player.act(image, player_info)
+    def __call__(self, image, player_info, **kwargs):
+        return self.player.act(image, player_info, **kwargs)
 
 
 class Tournament:
@@ -74,14 +88,14 @@ class Tournament:
 
             list_actions = []
             for i, p in enumerate(self.active_players):
-                HACK_DICT['render_data'] = self.k.render_data[i]
-                HACK_DICT['state'] = state
+                # HACK_DICT['render_data'] = self.k.render_data[i]
+                # HACK_DICT['state'] = state
 
                 player = state.players[i]
                 image = self.k.render_data[i].image
 
                 action = pystk.Action()
-                player_action = p(image, player)
+                player_action = p(image, player, game_state=state)
                 for a in player_action:
                     setattr(action, a, player_action[a])
 
