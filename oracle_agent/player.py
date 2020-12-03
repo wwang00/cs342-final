@@ -4,7 +4,7 @@ from numpy.linalg import norm
 
 
 class HockeyPlayer(object):
-    TARGET_SPEED = 20
+    TARGET_SPEED = 15
     DRIFT_ANGLE = 20
     BRAKE_ANGLE = 30
     DEFENSE_RADIUS = 40
@@ -13,7 +13,7 @@ class HockeyPlayer(object):
         self.player_id = player_id
         self.kart = 'tux'
         self.team = player_id % 2
-        self.offense = player_id < 2
+        self.offense = not player_id < 2
         self.goal = np.float32([0, 64 if self.team == 0 else -64])
         self.own_goal = np.float32([0, -65 if self.team == 0 else 65])
 
@@ -56,7 +56,7 @@ class HockeyPlayer(object):
         v /= norm(v)
         theta = np.degrees(np.arccos(np.dot(u, v)))
         signed_theta = -np.sign(np.cross(u, v)) * np.sign(np.dot(u, vel)) * theta
-        steer = signed_theta / 10
+        steer = signed_theta / 8
 
         # brake or accelerate
         drift = False

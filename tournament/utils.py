@@ -68,9 +68,9 @@ class Tournament:
             print('\rframe %d' % t, end='\r')
 
             state.update()
-            if(state.soccer.ball.location[1] > 5):
-                state.set_ball_location([np.random.uniform(-20, 20), 0, np.random.uniform(-20, 20)])
-                state.update()
+            # if(state.soccer.ball.location[1] > 5):
+            #     state.set_ball_location([np.random.uniform(-20, 20), 0, np.random.uniform(-20, 20)])
+            #     state.update()
 
             list_actions = []
             for i, p in enumerate(self.active_players):
