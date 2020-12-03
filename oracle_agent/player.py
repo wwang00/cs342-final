@@ -9,9 +9,9 @@ class HockeyPlayer(object):
     BRAKE_ANGLE = 30
     DEFENSE_RADIUS = 40
 
-    def __init__(self, player_id=0):
+    def __init__(self, player_id=0, kart='wilber'):
         self.player_id = player_id
-        self.kart = 'tux'
+        self.kart = kart
         self.team = player_id % 2
         self.offense = not player_id < 2
         self.goal = np.float32([0, 64 if self.team == 0 else -64])
