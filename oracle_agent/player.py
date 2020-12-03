@@ -17,13 +17,14 @@ class HockeyPlayer(object):
         self.goal = np.float32([0, 64 if self.team == 0 else -64])
         self.own_goal = np.float32([0, -65 if self.team == 0 else 65])
 
-    def act(self, image, player_info):
+    def act(self, image, player_info, game_state=None, mask=None):
         """
         :param image: numpy array of shape (300, 400, 3)
         :param player_info: pystk.Player object for the current kart.
         return: Dict describing the action
         """
-        puck = np.float32(HACK_DICT['state'].soccer.ball.location)[[0, 2]]
+        # puck = np.float32(HACK_DICT['state'].soccer.ball.location)[[0, 2]]
+        puck = np.float32(game_state.soccer.ball.location)[[0, 2]]
         front = np.float32(player_info.kart.front)[[0, 2]]
         kart = np.float32(player_info.kart.location)[[0, 2]]
         vel = np.float32(player_info.kart.velocity)[[0, 2]]
