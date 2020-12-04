@@ -102,7 +102,7 @@ class Tournament:
                 list_actions.append(action)
 
                 if save is not None:
-                    image = np.array(T.resize(PIL.Image.fromarray(image), (150, 200)))[54:]
+                    image = np.array(T.resize(PIL.Image.fromarray(image), (150, 200))) #[54:]
                     heatmap = np.zeros((96, 200), dtype=float)
                     puck_mask = np.array(self.k.render_data[i].instance[108:] == 134217729)
                     puck_visible = np.any(puck_mask)

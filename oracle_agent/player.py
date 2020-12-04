@@ -1,6 +1,12 @@
 from tournament.utils import HACK_DICT
 import numpy as np
 from numpy.linalg import norm
+import oracle_agent.utils as utils
+import sys
+sys.path.insert(1, './solution')
+import models
+import torch
+from os import path
 
 
 class HockeyPlayer(object):
@@ -13,8 +19,11 @@ class HockeyPlayer(object):
         self.player_id = player_id
         self.kart = kart
         self.team = player_id % 2
-        self.offense = not player_id < 2
+        self.offense = True #not player_id < 2
         self.goal = np.float32([0, 64 if self.team == 0 else -64])
+        self.model = models.Detector()
+        self.model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), "..", path.join('solution', 'det.th')), map_location='cpu'))
+        self.model = self.model.cuda()
         self.own_goal = np.float32([0, -65 if self.team == 0 else 65])
 
     def act(self, image, player_info, game_state=None, mask=None):
@@ -24,6 +33,11 @@ class HockeyPlayer(object):
         return: Dict describing the action
         """
         # puck = np.float32(HACK_DICT['state'].soccer.ball.location)[[0, 2]]
+        dets, depth, is_puck = self.model.detect(torch.from_numpy(image/255.0).float().permute(2, 0, 1).cuda())
+        puck = dets[1][0]
+        #print(puck[1]/400)
+        #print(puck[2]/300)
+        print(utils.center_to_world(puck[1], puck[2], 400, 300, np.array(player_info.camera.projection)))
         puck = np.float32(game_state.soccer.ball.location)[[0, 2]]
         front = np.float32(player_info.kart.front)[[0, 2]]
         kart = np.float32(player_info.kart.location)[[0, 2]]
