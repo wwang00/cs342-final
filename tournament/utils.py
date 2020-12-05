@@ -97,7 +97,8 @@ class Tournament:
                 action = pystk.Action()
                 player_action = p(image, player, game_state=state)
                 for a in player_action:
-                    setattr(action, a, player_action[a])
+                    if a is not "puck_map":
+                      setattr(action, a, player_action[a])
 
                 list_actions.append(action)
 
@@ -125,6 +126,9 @@ class Tournament:
                     # draw.text((0, 40), f'({loc_x}, {loc_z})', (255, 0, 0), font)
                     image.save(os.path.join(save, 'player%02d_%05d.png' % (i, t)))
                     torch.save(heatmap, os.path.join(save, 'player%02d_%05d.pt' % (i, t)))
+                    if "puck_map" in player_action:
+                        PIL.Image.fromarray(player_action["puck_map"].astype(np.uint8)).save(os.path.join(save, 'player%02d_%05d_2d.png' % (i, t)))
+
 
             s = self.k.step(list_actions)
             if not s:  # Game over
