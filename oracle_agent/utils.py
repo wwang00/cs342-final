@@ -17,8 +17,11 @@ def mask_to_world(mask, proj, height=.36983):
         return None
     # assert len(mask.shape) == 2
     # assert proj.shape == (4,4)
-    tx = (2*ax/mask.shape[1]) - 1
-    ty = 1-(2*ay/mask.shape[0])
+    return center_to_world(ax, ay, mask.shape[1], mask.shape[0], proj, height=height)
+
+def center_to_world(ax, ay, iwidth, iheight, proj, height=0.36983):
+    tx = (2*ax/iwidth) - 1
+    ty = 1-(2*ay/iheight)
 
     # get projection and inverse projection
     proji = np.linalg.inv(proj)

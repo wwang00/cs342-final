@@ -1,7 +1,7 @@
 import pystk
 import numpy as np
 import torch
-
+import time
 
 # Privileged information.
 HACK_DICT = dict()
@@ -36,7 +36,11 @@ class Player:
         )
 
     def __call__(self, image, player_info, **kwargs):
-        return self.player.act(image, player_info, **kwargs)
+        btime = time.time()
+        ret = self.player.act(image, player_info, **kwargs)
+        print(time.time()-btime)
+        return ret
+
 
 
 class Tournament:
@@ -97,12 +101,13 @@ class Tournament:
                 action = pystk.Action()
                 player_action = p(image, player, game_state=state)
                 for a in player_action:
-                    setattr(action, a, player_action[a])
+                    if a is not "puck_map":
+                      setattr(action, a, player_action[a])
 
                 list_actions.append(action)
 
                 if save is not None:
-                    image = np.array(T.resize(PIL.Image.fromarray(image), (150, 200)))[54:]
+                    image = np.array(T.resize(PIL.Image.fromarray(image), (150, 200))) #[54:]
                     heatmap = np.zeros((96, 200), dtype=float)
                     puck_mask = np.array(self.k.render_data[i].instance[108:] == 134217729)
                     puck_visible = np.any(puck_mask)
@@ -125,6 +130,9 @@ class Tournament:
                     # draw.text((0, 40), f'({loc_x}, {loc_z})', (255, 0, 0), font)
                     image.save(os.path.join(save, 'player%02d_%05d.png' % (i, t)))
                     torch.save(heatmap, os.path.join(save, 'player%02d_%05d.pt' % (i, t)))
+                    if "puck_map" in player_action:
+                        PIL.Image.fromarray(player_action["puck_map"].astype(np.uint8)).save(os.path.join(save, 'player%02d_%05d_2d.png' % (i, t)))
+
 
             s = self.k.step(list_actions)
             if not s:  # Game over

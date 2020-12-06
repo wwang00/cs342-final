@@ -1,5 +1,9 @@
 data/
 
+# Development files
+*.ttf
+.vscode
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
