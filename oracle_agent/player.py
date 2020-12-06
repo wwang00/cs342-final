@@ -23,7 +23,7 @@ class HockeyPlayer(object):
         self.goal = np.float32([0, 64 if self.team == 0 else -64])
         self.model = models.Detector()
         self.model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), "..", path.join('solution', 'det.th')), map_location='cpu'))
-        self.model = self.model.cuda()
+        # self.model = self.model.cuda()
         self.own_goal = np.float32([0, -65 if self.team == 0 else 65])
         self.last_puck = None
 
@@ -34,7 +34,9 @@ class HockeyPlayer(object):
         return: Dict describing the action
         """
         # puck = np.float32(HACK_DICT['state'].soccer.ball.location)[[0, 2]]
-        dets, depth, is_puck = self.model.detect(torch.from_numpy(image/255.0).float().permute(2, 0, 1).cuda())
+        # dets, depth, is_puck = self.model.detect(torch.from_numpy(image/255.0).float().permute(2, 0, 1).cuda())
+        dets, depth, is_puck = self.model.detect(torch.from_numpy(image/255.0).float().permute(2, 0, 1))
+
         puck = dets[1][0]
         #print(puck[1]/400)
         #print(puck[2]/300)

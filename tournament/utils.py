@@ -1,7 +1,7 @@
 import pystk
 import numpy as np
 import torch
-
+import time
 
 # Privileged information.
 HACK_DICT = dict()
@@ -36,7 +36,11 @@ class Player:
         )
 
     def __call__(self, image, player_info, **kwargs):
-        return self.player.act(image, player_info, **kwargs)
+        btime = time.time()
+        ret = self.player.act(image, player_info, **kwargs)
+        print(time.time()-btime)
+        return ret
+
 
 
 class Tournament:
