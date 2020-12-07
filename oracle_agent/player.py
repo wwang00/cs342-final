@@ -1,10 +1,12 @@
-from tournament.utils import HACK_DICT
+# from tournament.utils import HACK_DICT
 import numpy as np
 from numpy.linalg import norm
 import oracle_agent.utils as utils
 import sys
-sys.path.insert(1, './solution')
-import models
+# sys.path.insert(1, './solution')
+# import models
+import oracle_agent.models as models
+
 import torch
 from os import path
 
@@ -26,8 +28,8 @@ class HockeyPlayer(object):
         self.own_goal = np.float32([0, -65 if self.team == 0 else 65])
         self.goal = np.float32([0, 64 if self.team == 0 else -64])
         self.model = models.Detector()
-        self.model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), "..", path.join('solution', 'det.th')), map_location='cpu'))
-        # self.model = self.model.cuda()
+        self.model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), 'det.th'), map_location='cpu'))
+        self.model = self.model.cuda()
 
         # states
         self.offense = (player_id == 0)
@@ -48,8 +50,8 @@ class HockeyPlayer(object):
         return: Dict describing the action
         """
         # puck = np.float32(HACK_DICT['state'].soccer.ball.location)[[0, 2]]
-        # dets, depth, is_puck = self.model.detect(torch.from_numpy(image/255.0).float().permute(2, 0, 1).cuda())
-        dets, depth, is_puck = self.model.detect(torch.from_numpy(image/255.0).float().permute(2, 0, 1))
+        dets, depth, is_puck = self.model.detect(torch.from_numpy(image/255.0).float().permute(2, 0, 1).cuda())
+        # dets, depth, is_puck = self.model.detect(torch.from_numpy(image/255.0).float().permute(2, 0, 1))
 
         front = np.float32(player_info.kart.front)[[0, 2]]
         kart = np.float32(player_info.kart.location)[[0, 2]]
@@ -111,7 +113,7 @@ class HockeyPlayer(object):
         #   else:
         #     puck = puck[[0, 2]]
         # realpuck = np.float32(game_state.soccer.ball.location)[[0, 2]]
-        puck_map = np.zeros((66 * 4, 66 * 4, 3))
+        # puck_map = np.zeros((66 * 4, 66 * 4, 3))
         # puck_map[int(round(-66 + 66 * 2 - 1)):int(round(-66 + 66 * 2 + 133)), int(round(-50 + 66 * 2 - 1)):int(round(-50 + 66 * 2 + 1))] = [100, 0, 0]
         # puck_map[int(round(-66 + 66 * 2 - 1)):int(round(-66 + 66 * 2 + 133)), int(round(-50 + 66 * 2 - 1 + 100)):int(round(-50 + 66 * 2 + 101))] = [100, 0, 0]
         # puck_map[int(round(-66 + 66 * 2 - 1)):int(round(-66 + 66 * 2 + 1)), int(round(-50 + 66 * 2 - 1)):int(round(50 + 66 * 2 + 1))] = [100, 0, 0]
@@ -175,5 +177,5 @@ class HockeyPlayer(object):
             'drift': False,
             'nitro': False,
             'rescue': False,
-            'puck_map': puck_map
+            # 'puck_map': puck_map
         }

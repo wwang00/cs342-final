@@ -1,6 +1,6 @@
   
 import numpy as np
-import cv2
+# import cv2
 
 def mask_to_average(mask):
     xs = np.where(np.any(mask, axis=0))[0]
@@ -44,23 +44,23 @@ def center_to_world(ax, ay, iwidth, iheight, proj, height=0.36983):
     
     return world_pred.flatten()[:3]
 
-def draw_cords(image, world_cord, proj):
+# def draw_cords(image, world_cord, proj):
 
-    c4d = np.vstack([world_cord.reshape(3,1), np.array([[1.0]])] )
+#     c4d = np.vstack([world_cord.reshape(3,1), np.array([[1.0]])] )
 
-    cam_proj = proj @ c4d
-    cam_proj /= cam_proj[3]
+#     cam_proj = proj @ c4d
+#     cam_proj /= cam_proj[3]
     
-    # if dot out of focal range, or behind us
-    if abs(cam_proj[0]) > 1 or abs(cam_proj[1]) > 1 or c4d[2] < 0:
-        return image
-    # convert to image coords wrt top left corner
-    ix = int(image.shape[1]/2 + cam_proj[0] * image.shape[1]/2)
-    iy = int(image.shape[0]/2 - cam_proj[1] * image.shape[0]/2)
-    return cv2.circle(image,(ix, iy), 3, (0,255,0), -1)
+#     # if dot out of focal range, or behind us
+#     if abs(cam_proj[0]) > 1 or abs(cam_proj[1]) > 1 or c4d[2] < 0:
+#         return image
+#     # convert to image coords wrt top left corner
+#     ix = int(image.shape[1]/2 + cam_proj[0] * image.shape[1]/2)
+#     iy = int(image.shape[0]/2 - cam_proj[1] * image.shape[0]/2)
+#     return cv2.circle(image,(ix, iy), 3, (0,255,0), -1)
 
-def draw_arr(image, arr, ht=20):
-    s = ''
-    for i in range(arr.shape[0]):
-        s += f'{float(arr[i]):.2f},'
-    return cv2.putText(img=image, text=s, org=(ht,30),fontFace=5, fontScale=1, color=(0,0,255), thickness=1)
+# def draw_arr(image, arr, ht=20):
+#     s = ''
+#     for i in range(arr.shape[0]):
+#         s += f'{float(arr[i]):.2f},'
+#     return cv2.putText(img=image, text=s, org=(ht,30),fontFace=5, fontScale=1, color=(0,0,255), thickness=1)
