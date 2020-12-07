@@ -12,7 +12,7 @@ from os import path
 
 
 class HockeyPlayer(object):
-    TARGET_SPEED = 15
+    TARGET_SPEED = 25
     DRIFT_ANGLE = 20
     BRAKE_ANGLE = 30
     DEFENSE_RADIUS = 40
@@ -20,7 +20,7 @@ class HockeyPlayer(object):
     PUCK = None
     PUCK_T = 0
 
-    def __init__(self, player_id=0, kart='wilber'):
+    def __init__(self, player_id=0, kart='tux'):
         # constants
         self.player_id = player_id
         self.kart = kart
@@ -42,6 +42,7 @@ class HockeyPlayer(object):
         # recurrent info
         self.last_puck = None
         self.last_loc = None 
+        self.time_without_puck = 0
 
     def act(self, image, player_info, game_state=None, mask=None):
         """
@@ -60,11 +61,20 @@ class HockeyPlayer(object):
 
         if self.last_loc is None or float(norm(kart - self.last_loc)) > 10:
             self.t = 0
+            self.time_without_puck = 0
         self.last_loc = kart
 
         coords = dets[1][0]
         proj =  np.array(player_info.camera.projection).T @ np.array(player_info.camera.view).T
         puck = utils.center_to_world(coords[1], coords[2], 400, 300, proj)
+        if len(dets[0]) < 2:
+          other_kart = None
+        else:
+          dets[0].sort(key=lambda x: -x[0])
+          coords = dets[0][1]
+          other_kart = utils.center_to_world(coords[1], coords[2], 400, 300, proj)
+          if other_kart is not None:
+            other_kart = other_kart[[0,2]]
 
         #print(puck[1]/400)
         #print(puck[2]/300)
@@ -74,6 +84,12 @@ class HockeyPlayer(object):
             # print(puck.shape)
             puck = puck[[0,2]]
             self.pucklock = True
+            if is_puck > 0:
+                self.time_without_puck = 0
+            else:
+                self.time_without_puck += 1
+        else:
+            self.time_without_puck += 1
 
         if puck is None:
             otherpuck = HockeyPlayer.PUCK
@@ -96,7 +112,7 @@ class HockeyPlayer(object):
 
         self.t += 1
         
-        if self.offense and self.t <= 20:
+        if self.offense and self.t <= 25:
             return {
                 'steer': 0,
                 'acceleration': 1,
@@ -139,17 +155,26 @@ class HockeyPlayer(object):
         u = front - kart
         u /= norm(u)
 
+        go_back = False
         # find aimpoint
         if self.offense:
             puck_goal = self.goal - puck
             puck_goal /= norm(puck_goal)
             kart_puck_dist = norm(puck - kart)
             aim = puck - puck_goal * kart_puck_dist / 2
+            if self.t >= 25 and self.time_without_puck > 10:
+                if other_kart is not None:
+                    aim = other_kart
+                elif (self.t // 10) % 2 == 0:
+                    go_back = True
+                #    aim = np.float32([0,0])
         else:  # defense
             own_goal_puck = puck - self.own_goal
             own_goal_puck_dist = norm(own_goal_puck)
 
-            if own_goal_puck_dist < self.DEFENSE_RADIUS:
+            if is_puck < 2 or dets[1][0][0] < 2:
+                aim = self.goal
+            elif own_goal_puck_dist < self.DEFENSE_RADIUS:
                 aim = puck - 1 * own_goal_puck / own_goal_puck_dist
             elif np.abs(kart[1]) < np.abs(self.own_goal[1]):
                 aim = self.own_goal
@@ -183,9 +208,10 @@ class HockeyPlayer(object):
                 brake = (np.sign(np.dot(u, vel)) == 1 and speed > 2) or 5 <= theta
                 accel = 1 if brake == 0 and np.sign(np.dot(u, vel)) == -1 and speed > 2 else 0
 
+        steer *= 5
         return {
             'steer': steer,
-            'acceleration': accel,
+            'acceleration': -1 if go_back else accel,
             'brake': brake,
             'drift': False,
             'nitro': False,
