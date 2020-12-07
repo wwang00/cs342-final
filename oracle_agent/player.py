@@ -32,7 +32,7 @@ class HockeyPlayer(object):
         self.model = self.model.cuda()
 
         # states
-        self.offense = (player_id == 0)
+        self.offense = (player_id >= 2)
         self.pucklock = True
 
         # vars
@@ -93,6 +93,19 @@ class HockeyPlayer(object):
             # set shared puck
             HockeyPlayer.PUCK = puck
             HockeyPlayer.PUCK_T = self.t
+
+        self.t += 1
+        
+        if self.offense and self.t <= 20:
+            return {
+                'steer': 0,
+                'acceleration': 1,
+                'brake': False,
+                'drift': False,
+                'nitro': False,
+                'rescue': False,
+                # 'puck_map': puck_map
+            }
         # puck_updated = False
         # if is_puck > 0 and puck[0] > 2 and len(dets[0]) > 0 and abs(puck[1] - dets[0][0][1]) + abs(puck[2] - dets[0][0][2]) > 45: # and abs(puck[3] - dets[0][0][3]) + abs(puck[4] - dets[0][0][4]) > 10:
         #   puck = utils.center_to_world(puck[1], puck[2], 400, 300, np.array(player_info.camera.projection).T @ np.array(player_info.camera.view).T)
